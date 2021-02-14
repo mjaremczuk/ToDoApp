@@ -3,7 +3,9 @@ package com.udacity.project4.locationreminders.savereminder
 import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.PointOfInterest
+import com.google.firebase.auth.FirebaseAuth
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseViewModel
 import com.udacity.project4.base.NavigationCommand
@@ -20,18 +22,7 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
     val selectedPOI = MutableLiveData<PointOfInterest>()
     val latitude = MutableLiveData<Double>()
     val longitude = MutableLiveData<Double>()
-
-    /**
-     * Clear the live data objects to start fresh next time the view model gets called
-     */
-    fun onClear() {
-        reminderTitle.value = null
-        reminderDescription.value = null
-        reminderSelectedLocationStr.value = null
-        selectedPOI.value = null
-        latitude.value = null
-        longitude.value = null
-    }
+    val currentMarker = MutableLiveData<Marker?>()
 
     /**
      * Validate the entered data then saves the reminder data to the DataSource
@@ -55,6 +46,7 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
                     reminderData.location,
                     reminderData.latitude,
                     reminderData.longitude,
+                    FirebaseAuth.getInstance().currentUser?.uid,
                     reminderData.id
                 )
             )
@@ -78,5 +70,20 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
             return false
         }
         return true
+    }
+
+    fun updateSelectedLocation() {
+        latitude.value = currentMarker.value?.position?.latitude
+        longitude.value = currentMarker.value?.position?.longitude
+        reminderSelectedLocationStr.value = currentMarker.value?.title
+    }
+
+    fun onClear() {
+        reminderTitle.value = null
+        reminderDescription.value = null
+        reminderSelectedLocationStr.value = null
+        selectedPOI.value = null
+        latitude.value = null
+        longitude.value = null
     }
 }

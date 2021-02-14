@@ -4,6 +4,7 @@ import android.view.View
 import androidx.databinding.BindingAdapter
 import androidx.lifecycle.LiveData
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.udacity.project4.base.BaseRecyclerViewAdapter
 
 
@@ -43,5 +44,11 @@ object BindingAdapters {
                     view.fadeOut()
             }
         }
+    }
+
+    @BindingAdapter("android:updateRefreshState")
+    @JvmStatic
+    fun updateRefreshState(view: SwipeRefreshLayout, refreshing: Boolean? = false) {
+        view.isRefreshing = refreshing == true
     }
 }

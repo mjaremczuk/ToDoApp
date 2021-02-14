@@ -3,7 +3,9 @@ package com.udacity.project4.locationreminders.data.local
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Concrete implementation of a data source as a db.
@@ -22,13 +24,14 @@ class RemindersLocalRepository(
      * Get the reminders list from the local db
      * @return Result the holds a Success with all the reminders or an Error object with the error message
      */
-    override suspend fun getReminders(): Result<List<ReminderDTO>> = withContext(ioDispatcher) {
-        return@withContext try {
-            Result.Success(remindersDao.getReminders())
-        } catch (ex: Exception) {
-            Result.Error(ex.localizedMessage)
+    override suspend fun getReminders(userId: String?): Result<List<ReminderDTO>> =
+        withContext(ioDispatcher) {
+            return@withContext try {
+                Result.Success(remindersDao.getReminders(userId))
+            } catch (ex: Exception) {
+                Result.Error(ex.localizedMessage)
+            }
         }
-    }
 
     /**
      * Insert a reminder in the db.
