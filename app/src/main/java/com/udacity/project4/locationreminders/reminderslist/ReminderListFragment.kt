@@ -86,11 +86,11 @@ class ReminderListFragment : BaseFragment() {
             R.id.logout -> {
                 FirebaseAuth.getInstance().signOut()
                 Credentials.getClient(requireActivity()).disableAutoSignIn()
+                navigateToLogin()
                 _viewModel.loadReminders()
             }
         }
         return super.onOptionsItemSelected(item)
-
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

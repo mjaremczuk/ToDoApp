@@ -55,6 +55,7 @@ dependencies {
     implementation "com.google.android.material:material:$materialVersion"
     implementation "androidx.recyclerview:recyclerview:$recyclerViewVersion"
     implementation "androidx.constraintlayout:constraintlayout:$constraintVersion"
+    implementation 'com.google.maps.android:android-maps-utils:0.4.4'
 
     implementation 'com.google.code.gson:gson:2.8.5'
 

@@ -1,6 +1,7 @@
 package com.udacity.project4.locationreminders.savereminder
 
 import android.app.Application
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.Marker
@@ -23,6 +24,9 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
     val latitude = MutableLiveData<Double>()
     val longitude = MutableLiveData<Double>()
     val currentMarker = MutableLiveData<Marker?>()
+    private val _reminderAdded: MutableLiveData<ReminderDataItem?> = MutableLiveData()
+    val reminderAdded: LiveData<ReminderDataItem?>
+        get() = _reminderAdded
 
     /**
      * Validate the entered data then saves the reminder data to the DataSource
@@ -52,8 +56,13 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
             )
             showLoading.value = false
             showToast.value = app.getString(R.string.reminder_saved)
-            navigationCommand.value = NavigationCommand.Back
+            _reminderAdded.value = reminderData
         }
+    }
+
+    fun moveBackToReminderList() {
+        _reminderAdded.value = null
+        navigationCommand.value = NavigationCommand.Back
     }
 
     /**
@@ -73,9 +82,14 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
     }
 
     fun updateSelectedLocation() {
+        if (selectedPOI.value == null) {
+            showErrorMessage.value = app.getString(R.string.select_poi)
+            return
+        }
         latitude.value = currentMarker.value?.position?.latitude
         longitude.value = currentMarker.value?.position?.longitude
         reminderSelectedLocationStr.value = currentMarker.value?.title
+        navigationCommand.value = NavigationCommand.Back
     }
 
     fun onClear() {
@@ -85,5 +99,12 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
         selectedPOI.value = null
         latitude.value = null
         longitude.value = null
+        currentMarker.value = null
+    }
+
+    fun removeReminder(reminderDataItem: ReminderDataItem) {
+        viewModelScope.launch {
+            dataSource.delete(reminderDataItem.id)
+        }
     }
 }
