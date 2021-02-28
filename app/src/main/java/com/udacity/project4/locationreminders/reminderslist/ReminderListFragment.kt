@@ -35,7 +35,14 @@ class ReminderListFragment : BaseFragment() {
         setHasOptionsMenu(true)
         setDisplayHomeAsUpEnabled(false)
         setTitle(getString(R.string.app_name))
-
+        binding.addReminderFAB.setOnClickListener {
+            println("CLICK REMINDER FAB ${userRepository.isUserLoggedIn()}")
+            if (userRepository.isUserLoggedIn()) {
+                navigateToAddReminder()
+            } else {
+                navigateToLogin()
+            }
+        }
         binding.refreshLayout.setOnRefreshListener { _viewModel.loadReminders() }
         return binding.root
     }
@@ -43,13 +50,6 @@ class ReminderListFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
-        binding.addReminderFAB.setOnClickListener {
-            if (userRepository.isUserLoggedIn()) {
-                navigateToAddReminder()
-            } else {
-                navigateToLogin()
-            }
-        }
     }
 
     override fun onResume() {

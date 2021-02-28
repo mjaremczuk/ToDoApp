@@ -17,6 +17,7 @@ import androidx.test.filters.LargeTest
 import androidx.test.rule.GrantPermissionRule
 import com.google.firebase.auth.FirebaseAuth
 import com.udacity.project4.authentication.AuthenticationActivity
+import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.FirebaseUserRepository
 import com.udacity.project4.locationreminders.data.local.LocalDB
@@ -115,8 +116,8 @@ class RemindersActivityTest :
 
         onView(withId(R.id.password)).perform(typeText("12345a"), ViewActions.closeSoftKeyboard())
         onView(withId(R.id.button_done)).perform(click())
-        onView(withText("Location Reminders")).check(matches(isCompletelyDisplayed()))
-
+        onView(withText("Location Reminders")).check(matches(isDisplayed()))
+        onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
         createReminder()
 
         onView(withId(R.id.reminderssRecyclerView))
@@ -138,7 +139,8 @@ class RemindersActivityTest :
         onView(withId(R.id.password)).perform(typeText("12345a"), ViewActions.closeSoftKeyboard())
         onView(withId(R.id.button_create)).perform(click())
 
-        onView(withText("Location Reminders")).check(matches(isCompletelyDisplayed()))
+        onView(withText("Location Reminders")).check(matches(isDisplayed()))
+        onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
         createReminder()
 
         onView(withId(R.id.reminderssRecyclerView))
@@ -168,8 +170,9 @@ class RemindersActivityTest :
             ViewActions.closeSoftKeyboard()
         )
         onView(withId(R.id.selectLocation)).perform(click())
-        onView(withId(R.id.map)).perform(click())
 
+        onView(withId(R.id.save_marker)).check(matches(isDisplayed()))
+        onView(withId(R.id.map)).perform(click())
         onView(withId(R.id.save_marker)).perform(click())
         onView(ViewMatchers.withText("Please select a point of interest"))
             .inRoot(ToastMatcher()).check(ViewAssertions.matches(ViewMatchers.isDisplayed()))

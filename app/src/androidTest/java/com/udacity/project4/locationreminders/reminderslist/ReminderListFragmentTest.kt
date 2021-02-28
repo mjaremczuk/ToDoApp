@@ -1,14 +1,16 @@
 package com.udacity.project4.locationreminders.reminderslist
 
+import android.view.InputDevice
+import android.view.MotionEvent
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.Navigation
 import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.action.*
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.swipeDown
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.MediumTest
 import com.udacity.project4.BaseFragmentTest
 import com.udacity.project4.R
@@ -63,10 +65,9 @@ class ReminderListFragmentTest : BaseFragmentTest() {
         val scenario = launchFragmentInContainer<ReminderListFragment>(null, R.style.AppTheme)
 
         scenario.onFragment {
-            Navigation.setViewNavController(it.view!!, navController)
+            Navigation.setViewNavController(it.requireView(), navController)
         }
-
-        onView(withId(R.id.addReminderFAB)).perform(click())
+        onView(withId(R.id.addReminderFAB)).perform(clickTopCenter())
 
         verify(navController).navigate(
             ReminderListFragmentDirections.actionReminderListFragmentToLoginNavigation()
@@ -75,12 +76,23 @@ class ReminderListFragmentTest : BaseFragmentTest() {
 
     @Test
     fun navigateToSaveReminder() = runBlockingTest {
+        val reminderDto =
+            ReminderDTO(
+                "title",
+                "description",
+                "LocationName",
+                123.0,
+                456.0,
+                "user1",
+                "id1"
+            )
+        repository.saveReminder(reminderDto)
+
         val scenario = launchFragmentInContainer<ReminderListFragment>(null, R.style.AppTheme)
 
         scenario.onFragment {
-            Navigation.setViewNavController(it.view!!, navController)
+            Navigation.setViewNavController(it.requireView(), navController)
         }
-
         onView(withId(R.id.addReminderFAB)).perform(click())
 
         verify(navController).navigate(
@@ -118,18 +130,21 @@ class ReminderListFragmentTest : BaseFragmentTest() {
             .check(RecyclerViewItemCountAssertion.withItemCount(1))
     }
 
-    @FlakyTest(detail = "Sometimes test fails due to not matched final text")
     @Test
     fun showSnackBarError_FailedLoadReminders() = runBlockingTest {
         launchFragmentInContainer<ReminderListFragment>(null, R.style.AppTheme)
 
-        onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
         onView(withText("Could not get reminders")).check(matches(isDisplayed()))
-
-//        onView(withId(R.id.refreshLayout)).perform(swipeDown())
-
-//        onView(withId(R.id.reminderssRecyclerView))
-//            .check(RecyclerViewItemCountAssertion.withItemCount(0))
-//        onView(withText("Could not get reminders")).check(matches(isDisplayed()))
+        onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
     }
+
+    private fun clickTopCenter() = ViewActions.actionWithAssertions(
+        GeneralClickAction(
+            Tap.SINGLE,
+            GeneralLocation.TOP_CENTER,
+            Press.FINGER,
+            InputDevice.SOURCE_UNKNOWN,
+            MotionEvent.BUTTON_PRIMARY
+        )
+    )
 }

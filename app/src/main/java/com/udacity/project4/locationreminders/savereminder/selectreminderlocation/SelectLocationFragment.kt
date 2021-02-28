@@ -124,6 +124,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         setPoiClick(map)
         setMapStyle(map)
         permissionUtil.requestPermissions(this, PermissionsUtil.Permission.FOREGROUND_LOCATION)
+        binding.saveMarker.visibility = View.VISIBLE
     }
 
     private fun setMapStyle(map: GoogleMap) {
