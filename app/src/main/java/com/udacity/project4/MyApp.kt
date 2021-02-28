@@ -2,8 +2,10 @@ package com.udacity.project4
 
 import android.app.Application
 import com.udacity.project4.locationreminders.data.ReminderDataSource
+import com.udacity.project4.locationreminders.data.local.FirebaseUserRepository
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
+import com.udacity.project4.locationreminders.data.local.UserRepository
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import org.koin.android.ext.koin.androidContext
@@ -24,7 +26,8 @@ class MyApp : Application() {
             viewModel {
                 RemindersListViewModel(
                     get(),
-                    get() as ReminderDataSource
+                    get() as ReminderDataSource,
+                    get() as UserRepository
                 )
             }
             //Declare singleton definitions to be later injected using by inject()
@@ -35,6 +38,7 @@ class MyApp : Application() {
                     get() as ReminderDataSource
                 )
             }
+            single { FirebaseUserRepository() as UserRepository }
             single { RemindersLocalRepository(get()) as ReminderDataSource }
             single { LocalDB.createRemindersDao(this@MyApp) }
         }

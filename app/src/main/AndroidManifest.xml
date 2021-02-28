@@ -47,10 +47,10 @@
         <receiver
             android:name=".locationreminders.reminderslist.RemoveReminderBroadcastReceiver"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="true" />
         <service
             android:name=".locationreminders.reminderslist.RemoveReminderJobIntentService"
-            android:exported="false"
+            android:exported="true"
             android:permission="android.permission.BIND_JOB_SERVICE" />
         <receiver
             android:name=".locationreminders.geofence.GeofenceBroadcastReceiver"

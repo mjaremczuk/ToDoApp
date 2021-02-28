@@ -23,7 +23,6 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
     val selectedPOI = MutableLiveData<PointOfInterest>()
     val latitude = MutableLiveData<Double>()
     val longitude = MutableLiveData<Double>()
-    val currentMarker = MutableLiveData<Marker?>()
     private val _reminderAdded: MutableLiveData<ReminderDataItem?> = MutableLiveData()
     val reminderAdded: LiveData<ReminderDataItem?>
         get() = _reminderAdded
@@ -50,7 +49,7 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
                     reminderData.location,
                     reminderData.latitude,
                     reminderData.longitude,
-                    FirebaseAuth.getInstance().currentUser?.uid,
+                    reminderData.userId,
                     reminderData.id
                 )
             )
@@ -86,9 +85,9 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
             showErrorMessage.value = app.getString(R.string.select_poi)
             return
         }
-        latitude.value = currentMarker.value?.position?.latitude
-        longitude.value = currentMarker.value?.position?.longitude
-        reminderSelectedLocationStr.value = currentMarker.value?.title
+        latitude.value = selectedPOI.value?.latLng?.latitude
+        longitude.value = selectedPOI.value?.latLng?.longitude
+        reminderSelectedLocationStr.value = selectedPOI.value?.name
         navigationCommand.value = NavigationCommand.Back
     }
 
@@ -99,12 +98,14 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
         selectedPOI.value = null
         latitude.value = null
         longitude.value = null
-        currentMarker.value = null
     }
 
     fun removeReminder(reminderDataItem: ReminderDataItem) {
+        showLoading.value = true
         viewModelScope.launch {
             dataSource.delete(reminderDataItem.id)
+            showLoading.value = false
+            showSnackBarInt.value = R.string.reminder_removed
         }
     }
 }

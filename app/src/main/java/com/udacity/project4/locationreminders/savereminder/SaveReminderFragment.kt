@@ -13,10 +13,12 @@ import androidx.lifecycle.Observer
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.auth.FirebaseAuth
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSaveReminderBinding
+import com.udacity.project4.locationreminders.data.local.UserRepository
 import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.PermissionsUtil
@@ -32,6 +34,7 @@ class SaveReminderFragment : BaseFragment() {
     }
 
     override val _viewModel: SaveReminderViewModel by inject()
+    private val userRepository: UserRepository by inject()
     private lateinit var binding: FragmentSaveReminderBinding
 
     lateinit var geofencingClient: GeofencingClient
@@ -41,7 +44,6 @@ class SaveReminderFragment : BaseFragment() {
         val intent = Intent(requireContext(), GeofenceBroadcastReceiver::class.java).apply {
             action = ACTION_GEOFENCE_EVENT
         }
-        println("GEOFENCE incoming pending intent")
         PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
@@ -85,7 +87,13 @@ class SaveReminderFragment : BaseFragment() {
             permissionUtil.onPermissionGranted = {
                 checkDeviceLocationSettingsAndStartGeofence()
             }
-            permissionUtil.requestPermissions(this)
+            permissionUtil.onPermissionDenied = {
+                showSnackbarWithAction()
+            }
+            permissionUtil.requestPermissions(
+                this,
+                PermissionsUtil.Permission.BACKGROUND_PERMISSION
+            )
         }
     }
 
@@ -100,6 +108,17 @@ class SaveReminderFragment : BaseFragment() {
         grantResults: IntArray
     ) {
         permissionUtil.onRequestPermissionResult(requestCode, permissions, grantResults)
+    }
+
+    private fun showSnackbarWithAction() {
+        Snackbar.make(
+            binding.root,
+            R.string.permission_denied_explanation, Snackbar.LENGTH_INDEFINITE
+        )
+            .setAction(R.string.settings) {
+                // Displays App settings screen.
+                permissionUtil.requestPermission(this)
+            }.show()
     }
 
     private fun getGeofencingRequest(geofence: Geofence) = GeofencingRequest.Builder()
@@ -117,7 +136,8 @@ class SaveReminderFragment : BaseFragment() {
         // Set the expiration duration of the geofence. This geofence gets automatically
         // removed after this period of time.
         .setExpirationDuration(-1)
-        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER or Geofence.GEOFENCE_TRANSITION_DWELL)
+        .setLoiteringDelay(1)
         .build()
 
     private fun checkDeviceLocationSettingsAndStartGeofence(resolve: Boolean = true) {
@@ -144,7 +164,7 @@ class SaveReminderFragment : BaseFragment() {
                     )
                 } catch (sendEx: IntentSender.SendIntentException) {
                     Log.d(
-                        "SAVE REMIDNER",
+                        "SAVE REMINDER",
                         "Error geting location settings resolution: " + sendEx.message
                     )
                 }
@@ -194,7 +214,8 @@ class SaveReminderFragment : BaseFragment() {
             description,
             location,
             latitude,
-            longitude
+            longitude,
+            userRepository.getCurrentUserId()
         )
     }
 }

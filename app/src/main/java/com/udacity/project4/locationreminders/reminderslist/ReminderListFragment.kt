@@ -8,14 +8,18 @@ import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentRemindersBinding
+import com.udacity.project4.locationreminders.data.local.UserRepository
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import com.udacity.project4.utils.setTitle
 import com.udacity.project4.utils.setup
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ReminderListFragment : BaseFragment() {
 
     override val _viewModel: RemindersListViewModel by viewModel()
+
+    val userRepository: UserRepository by inject()
 
     private var _binding: FragmentRemindersBinding? = null
     private val binding: FragmentRemindersBinding
@@ -40,7 +44,7 @@ class ReminderListFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         binding.addReminderFAB.setOnClickListener {
-            if (FirebaseAuth.getInstance().currentUser != null) {
+            if (userRepository.isUserLoggedIn()) {
                 navigateToAddReminder()
             } else {
                 navigateToLogin()

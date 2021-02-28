@@ -2,7 +2,6 @@ package com.udacity.project4.locationreminders.reminderslist
 
 import android.content.Context
 import android.content.Intent
-import com.google.android.gms.location.LocationServices
 import com.udacity.project4.locationreminders.reminderslist.RemoveReminderBroadcastReceiver.Companion.EXTRA_NOTIFICATION_ID
 import com.udacity.project4.locationreminders.reminderslist.RemoveReminderBroadcastReceiver.Companion.EXTRA_REMINDER_ID
 import com.udacity.project4.utils.CoroutineAwareJobIntentService
@@ -32,11 +31,6 @@ class RemoveReminderJobIntentService : CoroutineAwareJobIntentService() {
             id?.let {
                 CoroutineScope(coroutineContext).launch(SupervisorJob()) {
                     remindersLocalRepository.delete(it)
-                    LocationServices.getGeofencingClient(this@RemoveReminderJobIntentService)
-                        .removeGeofences(listOf(it))
-                        .addOnCompleteListener {
-                            println("GEOFENCE removed")
-                        }
                 }
             }
         }

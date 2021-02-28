@@ -33,7 +33,7 @@ import java.util.*
 class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    lateinit var fusedLocationClient: FusedLocationProviderClient
 
     //Use Koin to get the view model of the SaveReminder
     override val _viewModel: SaveReminderViewModel by inject()
@@ -69,9 +69,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     private fun onLocationSelected() {
         _viewModel.updateSelectedLocation()
-        //        TODO: When the user confirms on the selected location,
-        //         send back the selected location details to the view model
-        //         and navigate back to the previous fragment to save the reminder and add the geofence
     }
 
     private fun showSnackbarWithAction() {
@@ -117,39 +114,17 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     override fun onStart() {
         super.onStart()
         if (::map.isInitialized) {
-            permissionUtil.requestPermissions(this)
+            permissionUtil.requestPermissions(this, PermissionsUtil.Permission.FOREGROUND_LOCATION)
         }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
-//        setMapLongClick(map)
         setPoiClick(map)
         setMapStyle(map)
-//        enableMyLocation()
-        permissionUtil.requestPermissions(this)
+        permissionUtil.requestPermissions(this, PermissionsUtil.Permission.FOREGROUND_LOCATION)
     }
-
-//    private fun isPermissionGranted(): Boolean {
-//        return ContextCompat.checkSelfPermission(
-//            requireContext(),
-//            Manifest.permission.ACCESS_FINE_LOCATION
-//        ) == PackageManager.PERMISSION_GRANTED
-//    }
-//
-//    @SuppressLint("MissingPermission")
-//    private fun enableMyLocation() {
-//        if (isPermissionGranted()) {
-//            map.isMyLocationEnabled = true
-//            animateToCurrentLocation()
-//        } else {
-//            requestPermissions(
-//                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-//                REQUEST_LOCATION_PERMISSION
-//            )
-//        }
-//    }
 
     private fun setMapStyle(map: GoogleMap) {
         try {
@@ -220,9 +195,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     }
 
     private fun addMarker(marker: MarkerOptions) {
-        _viewModel.currentMarker.value?.remove()
         val newMarker = map.addMarker(marker)
-        _viewModel.currentMarker.postValue(newMarker)
         newMarker.showInfoWindow()
     }
 }
