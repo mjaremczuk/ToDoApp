@@ -1,5 +1,6 @@
 package com.udacity.project4
 
+import android.app.Activity
 import android.app.Application
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
@@ -14,7 +15,14 @@ import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import androidx.test.platform.app.InstrumentationRegistry
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import androidx.test.rule.GrantPermissionRule
+import androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
+import androidx.test.runner.lifecycle.Stage
+import com.azimolabs.conditionwatcher.ConditionWatcher
+import com.azimolabs.conditionwatcher.Instruction
+import com.firebase.ui.auth.ui.email.EmailActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.udacity.project4.authentication.AuthenticationActivity
 import com.udacity.project4.locationreminders.RemindersActivity
@@ -39,6 +47,7 @@ import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.koin.test.AutoCloseKoinTest
 import org.koin.test.get
+
 
 @RunWith(AndroidJUnit4::class)
 @LargeTest
@@ -116,6 +125,9 @@ class RemindersActivityTest :
 
         onView(withId(R.id.password)).perform(typeText("12345a"), ViewActions.closeSoftKeyboard())
         onView(withId(R.id.button_done)).perform(click())
+
+        waitForRemindersActivity<RemindersActivity>()
+
         onView(withText("Location Reminders")).check(matches(isDisplayed()))
         onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
         createReminder()
@@ -135,9 +147,12 @@ class RemindersActivityTest :
 
         enterEmailAuthorization("${System.currentTimeMillis()}-test@gmail.com")
 
+        waitForRemindersActivity<EmailActivity>()
         onView(withId(R.id.name)).perform(typeText("John Doe"), ViewActions.closeSoftKeyboard())
         onView(withId(R.id.password)).perform(typeText("12345a"), ViewActions.closeSoftKeyboard())
         onView(withId(R.id.button_create)).perform(click())
+
+        waitForRemindersActivity<RemindersActivity>()
 
         onView(withText("Location Reminders")).check(matches(isDisplayed()))
         onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
@@ -181,5 +196,29 @@ class RemindersActivityTest :
         onView(ViewMatchers.withId(R.id.save_marker)).perform(click())
 
         onView(withId(R.id.saveReminder)).perform(click())
+    }
+
+    inline fun <reified T: Activity>waitForRemindersActivity() {
+        ConditionWatcher.waitForCondition(object : Instruction() {
+
+            fun getActivityInstance(): Activity? {
+                var currentActivity: Activity? = null
+                getInstrumentation().runOnMainSync(Runnable {
+                    val resumedActivities = ActivityLifecycleMonitorRegistry.getInstance()
+                        .getActivitiesInStage(Stage.RESUMED)
+                    for (activity in resumedActivities) {
+                        currentActivity = activity
+                        break
+                    }
+                })
+                return currentActivity
+            }
+
+            override fun getDescription() = "Reminders Activity should load"
+
+            override fun checkCondition(): Boolean {
+                return getActivityInstance() is T
+            }
+        })
     }
 }
