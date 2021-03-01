@@ -192,12 +192,10 @@ class SaveReminderFragment : BaseFragment() {
         )?.run {
             addOnSuccessListener {
                 _viewModel.moveBackToReminderList()
-                println("GEOFENCE added")
             }
             addOnFailureListener {
                 _viewModel.showErrorMessage.postValue(getString(R.string.geofences_not_added) + System.lineSeparator() + it.message)
                 _viewModel.moveBackToReminderList()
-                println("GEOFENCE FAILED $it\n ${it.message}")
             }
         }
     }

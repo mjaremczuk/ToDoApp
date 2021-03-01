@@ -36,7 +36,6 @@ class ReminderListFragment : BaseFragment() {
         setDisplayHomeAsUpEnabled(false)
         setTitle(getString(R.string.app_name))
         binding.addReminderFAB.setOnClickListener {
-            println("CLICK REMINDER FAB ${userRepository.isUserLoggedIn()}")
             if (userRepository.isUserLoggedIn()) {
                 navigateToAddReminder()
             } else {

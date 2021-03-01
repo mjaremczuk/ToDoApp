@@ -64,9 +64,7 @@ class GeofenceTransitionsJobIntentService : CoroutineAwareJobIntentService() {
                 val reminderDTO = result.data
                 LocationServices.getGeofencingClient(this@GeofenceTransitionsJobIntentService)
                     .removeGeofences(listOf(reminderDTO.id))
-                    .addOnCompleteListener {
-                        Toast.makeText(this@GeofenceTransitionsJobIntentService, "Geofence removed", Toast.LENGTH_LONG).show()
-                    }
+
                 //send a notification to the user with the reminder details
                 sendNotification(
                     this@GeofenceTransitionsJobIntentService, ReminderDataItem(
